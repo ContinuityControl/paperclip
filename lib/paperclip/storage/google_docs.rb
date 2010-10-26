@@ -18,6 +18,10 @@ module Paperclip
           @client = GData::Client::DocList.new
           @client.authsub_token = @google_credentials
         end        
+
+        Paperclip.interpolates(:original) do |attachment, style|
+          attachment.path
+        end
       end
 
 
