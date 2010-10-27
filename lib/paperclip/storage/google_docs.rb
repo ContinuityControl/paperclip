@@ -48,7 +48,7 @@ module Paperclip
 
       def flush_writes
         @queued_for_write.each do |style, file|
-          #begin
+          begin
             if !@saved
               log("saving #{path(style)}")
               
@@ -60,9 +60,10 @@ module Paperclip
               puts instance_read(:file_name)
               @saved = true
             end
-          #rescue Exception => e
-            # something
-          #end
+          rescue Exception => e
+            e.message << " (error during upload of #{original_filename})"
+            raise e
+          end
         end
       end
 
