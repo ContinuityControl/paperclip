@@ -13,7 +13,6 @@ class AttachmentTest < Test::Unit::TestCase
     @attachment.instance_variable_get(:@client).stubs(:post_file => @fake_result)
     @model = @attachment.instance
     @model.id = 1234
-    # @model.avatar_file_name = 'https://docs.google.com/edit?1234567890'
     @attachment.save
     assert_equal 'https://docs.google.com/edit?1234567890', @attachment.url
   end
@@ -36,7 +35,7 @@ class AttachmentTest < Test::Unit::TestCase
       assert_equal @attachment.instance_read(:content_type), 'text/plain'
     end
 
-    should "not break file_name" do
+    should "not break file_name before save" do
       assert_equal @attachment.instance_read(:file_name), 'stringio.txt'
     end
   end

@@ -10,6 +10,12 @@ module Paperclip
           raise e
         end
 
+        begin
+          require 'nokogiri'
+        rescue LoadError => e
+          e.message << " (You may need to install the nokogiri gem)"
+        end
+
         base.instance_eval do
           @google_credentials = @options[:cred_proc]
           @google_credentials = @google_credentials.call(self) if @google_credentials.is_a?(Proc)
@@ -18,28 +24,19 @@ module Paperclip
           @client = GData::Client::DocList.new
           @client.authsub_token = @google_credentials
         end        
-
-        Paperclip.interpolates(:original) do |attachment, style|
-          attachment.instance_read(:file_name)
-        end
-
-        Paperclip.interpolates(:google) do |attachment, style|
-          attachment.instance_read(:file_name)
-        end
-
       end
-
 
       def exists?(style = default_style)
         original_filename
       end
 
       def to_file style = default_style
-        #return @queued_for_write[style] if @queued_for_write[style]
+        return @queued_for_write[style] if @queued_for_write[style]
         filename = original_filename
         extname  = File.extname(filename)
         basename = File.basename(filename, extname)
         file = Tempfile.new(basename, extname)
+        file = Tempfile.new(url)
         file.write(path(style))
         file.rewind
         return file
@@ -56,7 +53,7 @@ module Paperclip
               log("saving #{path(style)}")
               
               result = @client.post_file(@google_url, file.path, instance_read(:content_type))
-              doc = ::Nokogiri::XML(result.body)
+              doc = Nokogiri::XML(result.body)
               @google_path = doc.css('link[rel=alternate]').first['href']
               instance_write(:file_name, @google_path)
               @_file_name = @google_path
