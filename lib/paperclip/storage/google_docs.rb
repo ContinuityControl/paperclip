@@ -57,7 +57,7 @@ module Paperclip
 <entry xmlns="http://www.w3.org/2005/Atom" xmlns:docs="http://schemas.google.com/docs/2007">
   <category scheme="http://schemas.google.com/g/2005#kind"
       term="http://schemas.google.com/docs/2007#document"/>
-  <title>#{orignal_filename}</title>
+  <title>#{instance_read(:file_name)}</title>
   <docs:writersCanInvite value="false" />
 </entry>
 XML
