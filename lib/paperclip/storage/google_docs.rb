@@ -52,7 +52,16 @@ module Paperclip
             if !@saved
               log("saving #{path(style)}")
               
-              result = @client.post_file(@google_url, file.path, instance_read(:content_type))
+              entry_xml = <<XML
+<?xml version='1.0' encoding='UTF-8'?>
+<entry xmlns="http://www.w3.org/2005/Atom" xmlns:docs="http://schemas.google.com/docs/2007">
+  <category scheme="http://schemas.google.com/g/2005#kind"
+      term="http://schemas.google.com/docs/2007#document"/>
+  <title>#{orignal_filename}</title>
+  <docs:writersCanInvite value="false" />
+</entry>
+XML
+              result = @client.post_file(@google_url, file.path, instance_read(:content_type), entry_xml)
               doc = Nokogiri::XML(result.body)
               @google_path = doc.css('link[rel=alternate]').first['href']
               instance_write(:file_name, @google_path)
