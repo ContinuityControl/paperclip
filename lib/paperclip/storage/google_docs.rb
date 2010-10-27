@@ -20,8 +20,13 @@ module Paperclip
         end        
 
         Paperclip.interpolates(:original) do |attachment, style|
-          attachment.path
+          attachment.instance_read(:file_name)
         end
+
+        Paperclip.interpolates(:google) do |attachment, style|
+          attachment.instance_read(:file_name)
+        end
+
       end
 
 
@@ -40,21 +45,27 @@ module Paperclip
         return file
       end
 
+      def url
+        instance_read(:file_name)
+      end
+
       def flush_writes
         @queued_for_write.each do |style, file|
-          begin
+          #begin
             if !@saved
               log("saving #{path(style)}")
               
               result = @client.post_file(@google_url, file.path, instance_read(:content_type))
-              doc = Nokogiri::XML(result.body)
-              path = doc.css('link[rel=alternate]').first['href']
-
+              doc = ::Nokogiri::XML(result.body)
+              @google_path = doc.css('link[rel=alternate]').first['href']
+              instance_write(:file_name, @google_path)
+              @_file_name = @google_path
+              puts instance_read(:file_name)
               @saved = true
             end
-          rescue Exception => e
+          #rescue Exception => e
             # something
-          end
+          #end
         end
       end
 
